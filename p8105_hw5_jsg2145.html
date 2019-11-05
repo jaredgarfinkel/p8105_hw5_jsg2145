@@ -394,6 +394,9 @@ iris_with_missing = iris %&gt;%
 ## # ... with 140 more rows</code></pre>
 <pre class="r"><code>iris_with_missing &lt;- iris_with_missing %&gt;% 
   janitor::clean_names()</code></pre>
+<pre class="r"><code>iris_nest &lt;- iris_with_missing %&gt;% 
+  janitor::clean_names() %&gt;% 
+  nest(data = sepal_length:petal_width)</code></pre>
 <pre class="r"><code>output = vector(&quot;list&quot;, length = 150)
 
 for (i in 1:150) {
@@ -401,6 +404,41 @@ for (i in 1:150) {
                         round(mean(pull(iris_with_missing, sepal_length), na.rm = TRUE),
                               digits = 1), 
                         pull(iris_with_missing, sepal_length)[[i]])
+}</code></pre>
+<pre class="r"><code>output = vector(&quot;list&quot;, length = 150)
+
+for (i in 1:150) {
+  output[[i]] = replace(pull(iris_with_missing, sepal_length)[[i]], 
+                        is.na(pull(iris_with_missing, sepal_length)[[i]]), 
+                        round(mean(pull(iris_with_missing, sepal_length), na.rm = TRUE), digits = 1))
+}</code></pre>
+<pre class="r"><code>iris_df &lt;- iris_with_missing %&gt;% 
+  select(-species)
+
+output = vector(&quot;list&quot;, length = 150)
+
+for (i in 1:150) {
+  output[[i]] = replace_na(pull(iris_df, sepal_length)[[i]], 
+                           round(mean(pull(iris_df, sepal_length), 
+                                      na.rm = TRUE), 
+                                 digits = 1))
+}</code></pre>
+<pre class="r"><code>output = vector(&quot;list&quot;, length = 150)
+
+for (i in 1:4) {
+  output[[i]] = if_else(is.na(pull(iris_df, data[[i]])),
+                        round(mean(pull(iris_df, data), na.rm = TRUE),
+                              digits = 1), 
+                        pull(iris_df, data[[i]]))
+}</code></pre>
+<pre class="r"><code>impute_iris = function(df){
+  iris_df %&gt;% 
+    mutate(sepal_length =
+  replace_na(sepal_length, 
+    round(mean(sepal_length,
+               na.rm = TRUE), 
+          digits = 1)))
+  
 }</code></pre>
 
 
