@@ -24,6 +24,8 @@ scale_fill_discrete = scale_fill_viridis_d
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
+##Problem 1
+
 ```{r}
 set.seed(10)
 
@@ -33,24 +35,49 @@ iris_with_missing = iris %>%
 ```
 
 ```{r}
-iris_with_missing %>% 
-  janitor::clean_names() %>% 
-  mutate(sepal_length =
-           if_else(is.na(sepal_length), round(mean(sepal_length, na.rm = TRUE), digits = 1), sepal_length))
-```
-
-
-```{r}
 iris_with_missing <- iris_with_missing %>% 
   janitor::clean_names()
 ```
 
+
+```{r, example}
+iris_with_missing %>% 
+  mutate(sepal_length =
+           if_else(is.na(sepal_length), round(mean(sepal_length, na.rm = TRUE), digits = 1), sepal_length))
+```
+
+```{r, example 2}
+iris_with_missing %>% 
+  mutate(sepal_length = 
+           replace_na(sepal_length, 
+                      round(mean(sepal_length, na.rm = TRUE), digits = 1)))
+```
+
+```{r, example char}
+iris_with_missing %>% 
+  mutate(species = 
+           replace_na(species, "virginica"))
+```
+
+
 ```{r}
+df <- iris_with_missing %>% 
+  janitor::clean_names()
+```
+
+```{r, echo = FALSE, eval = FALSE}
 iris_nest <- iris_with_missing %>% 
   janitor::clean_names() %>% 
   nest(data = sepal_length:petal_width)
 ```
 
+```{r, for loop char}
+output_c = vector("list", length = 150)
+
+for (i in 1:150) {
+  output_c[[i]] = replace_na(pull(iris_with_missing, species)[[i]], "virginica")
+}
+```
 
 ```{r}
 output = vector("list", length = 150)
@@ -73,7 +100,7 @@ for (i in 1:150) {
 }
 ```
 
-```{r}
+```{r, for loop}
 iris_df <- iris_with_missing %>% 
   select(-species)
 
@@ -88,6 +115,7 @@ for (i in 1:150) {
 ```
 
 
+
 ```{r, eval = FALSE}
 output = vector("list", length = 150)
 
@@ -99,17 +127,186 @@ for (i in 1:4) {
 }
 ```
 
-```{r}
+```{r, function}
 impute_iris = function(df){
-  iris_df %>% 
+  df %>% 
     mutate(sepal_length =
-  replace_na(sepal_length, 
-    round(mean(sepal_length,
-               na.rm = TRUE), 
-          digits = 1)))
-  
+             replace_na(sepal_length, 
+                        round(mean(sepal_length,
+                                   na.rm = TRUE), 
+                              digits = 1))) %>% 
+  mutate(sepal_width = 
+           replace_na(sepal_width,
+                      round(mean(sepal_width,
+                                 na.rm = TRUE),
+                            digits = 1))) %>% 
+  mutate(petal_length = 
+           replace_na(petal_length,
+                      round(mean(petal_length,
+                                 na.rm = TRUE),
+                            digits = 1))) %>% 
+  mutate(petal_width = 
+           replace_na(petal_width,
+                      round(mean(petal_width,
+                                 na.rm = TRUE),
+                            digits = 1))) %>% 
+  mutate(species = 
+           replace_na(species,
+                      "virginica"))
 }
+```
+  
+```{r, eval = FALSE}
+impute_df = function(df = iris_with_missing, x){
+  if_else(is_numeric(x),
+    mutate(x = 
+    replace_na(x, round(
+      mean(x, na.rm = TRUE),
+      digits = 1))),
+    mutate(x =
+             replace_na(x, "virginica")))
+}
+```
 
 
+```{r, general function colname, eval = FALSE}
+impute_dat = function(df = df, x){
+  df[[x]] %>% 
+    mutate(x = 
+    replace_na(df[[x]], round(
+      mean(df[[x]], na.rm = TRUE),
+      digits = 1)))
+}
+```
+
+```{r, echo = FALSE, eval = FALSE}
+output_f = vector("list", length = 5)
+
+for (i in 1:5) {
+  output_f[[i]] = 
+    if (is.character(df[[i]])) {
+      df[[i]] %>% 
+        mutate(replace_na(df[[i]], "virginica"))
+      } else
+        df %>% 
+    mutate(.[[i]] = 
+             replace_na(df[[i]], round(
+               mean(x, na.rm = TRUE),
+               digits = 1)))
+  output_f[[i]]
+}
+```
+
+
+```{r, general function}
+impute_dat = function(df = iris_with_missing, x){
+  if (is.character(x)) {
+    df %>% 
+      mutate(x = 
+               replace_na(x,
+                          "virginica")) %>% 
+    pull(x)
+  } else
+  df %>% 
+    mutate(x = 
+    replace_na(x, round(
+      mean(x, na.rm = TRUE),
+      digits = 1))) %>% 
+  pull(x)
+}
+```
+
+```{r, for loop over function}
+output_f = vector("list", length = 5)
+
+for (i in 1:5) {
+  output_f[[i]] = impute_dat(x = df[[i]])
+}
+```
+
+
+```{r, general}
+impute_for = function(df = iris_with_missing, x){
+  if(is.character(x)) {
+    df %>% 
+      mutate(x = 
+               replace_na(x,
+                          "virginica"))
+  } else
+  df %>% 
+    mutate(x = 
+    replace_na(x, round(
+      mean(x, na.rm = TRUE),
+      digits = 1)))
+}
+```
+
+```{r, map fn}
+output_df = vector("list", length = 5)
+
+for (i in 1:5) {
+  output_df = impute_for(x = iris_with_missing[[i]])
+}
+```
+
+
+```{r, function all vars}
+impute_mult = function(df = iris_with_missing, x){
+  df %>% 
+    if(is.character(x)) {
+          mutate(x =
+                   replace_na(x, "virginica"))
+    } else mutate(x = 
+             replace_na(x,
+             round(
+               mean(x, na.rm = TRUE), 
+               digits = 1)))
+  
+  impute_mult(df, x)
+}
+```
+
+```{r}
+output_f = vector("list", length = 5)
+
+for (i in 1:5) {
+  output[[i]] = impute_dat(x = iris_with_missing[[i]])
+}
+```
+
+
+```{r, eval = FALSE}
+output_f = vector("list", length = 4)
+
+for (i in 1:4) {
+  output[[i]] = impute_iris()
+}
+```
+
+
+```{r, eval = FALSE}
+impute_iris_df = function(df = iris_df, x = pull(iris_df, x)){
+  df %>% 
+    replace_na(list(x = 
+                      round(
+                        mean(x, 
+                             na.rm = TRUE),
+                        digits = 1)))
+}
+```
+
+## Problem 2
+
+```{r, example prob 2}
+data <- read_csv("./hw5_data/data/con_01.csv")
+```
+
+```{r, for loop prob 2}
+output_2 = vector("list", length = 20)
+
+for (i in 1:20) {
+  
+  output_2[[i]] = read_csv("./hw5_data/data/con_01.csv")
+}
 ```
 
