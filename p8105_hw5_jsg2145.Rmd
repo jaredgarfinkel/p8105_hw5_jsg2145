@@ -61,14 +61,7 @@ iris_with_missing %>%
 
 
 ```{r}
-df <- iris_with_missing %>% 
-  janitor::clean_names()
-```
-
-```{r, echo = FALSE, eval = FALSE}
-iris_nest <- iris_with_missing %>% 
-  janitor::clean_names() %>% 
-  nest(data = sepal_length:petal_width)
+df <- iris_with_missing
 ```
 
 ```{r, for loop char}
@@ -156,12 +149,63 @@ fix_df
 data <- read_csv("./hw5_data/data/con_01.csv")
 ```
 
-```{r, for loop prob 2}
+
+```{r, dataframe}
+titles <- tibble(
+  file_names = list.files("./hw5_data/data"),
+)
+```
+
+```{r}
+output_t = vector("list", length = 20)
+path = vector("list", length = 20)
+
+for (i in 1:20) {
+  path[[i]] = str_c("./hw5_data/data", pull(titles, file_names)[[i]], sep = "/")
+  output_t[[i]] = read_csv(path[[i]])
+}
+```
+
+
+```{r, read_data}
+read_data <- function(df = titles, x) {
+  path = str_c("./hw5_data/data", x, sep = "/")
+  data = read_csv(path)
+}
+```
+
+```{r, fill_data}
+fill_data <- function(df = titles, x) {
+  path = str_c("./hw5_data/data", x, sep = "/")
+  data = read_csv(path)
+  data
+}
+```
+
+
+```{r}
+output_ts = vector("list", length = 20)
+
+for (i in 1:20) {
+  output_ts[[i]] = read_data(x = pull(titles, file_names)[[i]])
+}
+```
+
+```{r, eval = FALSE}
+titles %>% 
+  mutate(
+    exp_df = purrr::map(titles, ~read_data(x = .x))
+  ) %>% 
+  unnest()
+```
+
+```{r, for loop prob 2, eval = FALSE}
 output_2 = vector("list", length = 20)
 
 for (i in 1:20) {
   
   output_2[[i]] = read_csv("./hw5_data/data/con_01.csv")
+  output_2 = output_2[[i]] + read_csv("hw5_data/data/con_02")
 }
 ```
 
