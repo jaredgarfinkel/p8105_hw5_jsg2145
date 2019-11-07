@@ -156,7 +156,7 @@ titles <- tibble(
 )
 ```
 
-```{r}
+```{r, message = FALSE}
 output_t = vector("list", length = 20)
 path = vector("list", length = 20)
 
@@ -174,16 +174,7 @@ read_data <- function(df = titles, x) {
 }
 ```
 
-```{r, fill_data}
-fill_data <- function(df = titles, x) {
-  path = str_c("./hw5_data/data", x, sep = "/")
-  data = read_csv(path)
-  data
-}
-```
-
-
-```{r}
+```{r, message = FALSE}
 output_ts = vector("list", length = 20)
 
 for (i in 1:20) {
@@ -191,21 +182,9 @@ for (i in 1:20) {
 }
 ```
 
-```{r, eval = FALSE}
+```{r, message = FALSE}
 titles %>% 
   mutate(
-    exp_df = purrr::map(titles, ~read_data(x = .x))
-  ) %>% 
+    data = map(.x = pull(titles, file_names), ~read_data(x = .x))) %>% 
   unnest()
 ```
-
-```{r, for loop prob 2, eval = FALSE}
-output_2 = vector("list", length = 20)
-
-for (i in 1:20) {
-  
-  output_2[[i]] = read_csv("./hw5_data/data/con_01.csv")
-  output_2 = output_2[[i]] + read_csv("hw5_data/data/con_02")
-}
-```
-
