@@ -252,6 +252,7 @@ B_1list = list("B_10" = 0,
               "B_14" = 4,
               "B_15" = 5,
               "B_16" = 6)
+
 output = vector("list", length = 7)
 
 for (i in 1:7) {
@@ -261,7 +262,7 @@ for (i in 1:7) {
 ```
 
 ```{r}
-output_df = map(B_1list, ~rerun(100, sim_regression(B_1 = .x)))
+output_df = map(B_1list, ~rerun(10000, sim_regression(B_1 = .x)))
 ```
 
 ```{r}
@@ -272,7 +273,7 @@ output_tib = bind_rows(list(output_df)) %>%
   group_by(B_1hat) %>%
   filter(p < 0.05) %>% 
   summarize(count = n()) %>% 
-  mutate(prop = count/100,
+  mutate(prop = count/10000,
          B_1hat = as.factor(B_1hat),
          B_1hat = as.numeric(B_1hat),
          B_1hat = B_1hat - 1)
@@ -323,7 +324,7 @@ ggplot(p1, aes(x = B_1hat, y = mean_est)) +
 
 Typically, the sample average of $\hat{\beta_1}$ across tests for which the null is rejected
 
-does not approximate the true value of $\beta_1$. However, it can approximate the true value
+is not expected to approximate the true value of $\beta_1$. However, it can approximate the true value
 
 if there are a similar number of estimates greater than and less than the true value. 
 
