@@ -202,9 +202,14 @@ exp_tidy <- exp_df %>%
 exp_tidy %>% 
   group_by(file_names) %>% 
   mutate(week = as_factor(week),
-         week = as.numeric(week)) %>% 
+         week = as.numeric(week),
+         labels = ifelse(str_detect(file_names, "^con"), "control", "experimental")) %>% 
   ggplot(aes(x = week, y = value, color = file_names)) +
   geom_point() +
-  geom_smooth(se = FALSE)
+  geom_smooth(se = FALSE) +
+  facet_grid(~labels) +
+  theme(legend.position = "none")
 ```
+
+## Problem 3
 

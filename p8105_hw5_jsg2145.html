@@ -621,10 +621,16 @@ for (i in 1:20) {
 <pre class="r"><code>exp_tidy %&gt;% 
   group_by(file_names) %&gt;% 
   mutate(week = as_factor(week),
-         week = as.numeric(week)) %&gt;% 
+         week = as.numeric(week),
+         labels = ifelse(str_detect(file_names, &quot;^con&quot;), &quot;control&quot;, &quot;experimental&quot;)) %&gt;% 
   ggplot(aes(x = week, y = value, color = file_names)) +
   geom_point() +
-  geom_smooth(se = FALSE)</code></pre>
+  geom_smooth(se = FALSE) +
+  facet_grid(~labels) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+</div>
+<div id="problem-3" class="section level2">
+<h2>Problem 3</h2>
 </div>
 
 
