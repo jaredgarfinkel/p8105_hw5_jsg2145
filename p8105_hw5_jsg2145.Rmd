@@ -198,7 +198,7 @@ exp_tidy <- exp_df %>%
            str_replace_all(file_names, c("con_" = "control ", "exp_" = "experimental ")))
 ```
 
-```{r, eval = FALSE}
+```{r}
 exp_tidy %>% 
   group_by(file_names) %>% 
   mutate(week = as_factor(week),
