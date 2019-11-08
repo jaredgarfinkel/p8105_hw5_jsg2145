@@ -39,14 +39,14 @@ iris_with_missing <- iris_with_missing %>%
   janitor::clean_names()
 ```
 
-```{r, example 2}
+```{r, example 2, results = "hide"}
 iris_with_missing %>% 
   mutate(sepal_length = 
            replace_na(sepal_length, 
                       round(mean(sepal_length, na.rm = TRUE), digits = 1)))
 ```
 
-```{r, example char}
+```{r, example char, results = "hide"}
 iris_with_missing %>% 
   mutate(species = 
            replace_na(species, "virginica"))
@@ -137,7 +137,7 @@ fix_df
 
 ## Problem 2
 
-```{r, example prob 2}
+```{r, example prob 2, message = FALSE}
 data <- read_csv("./hw5_data/data/con_01.csv")
 ```
 
@@ -202,6 +202,10 @@ exp_tidy %>%
   facet_grid(~labels) +
   theme(legend.position = "none")
 ```
+
+It appears that the measured variable stayed the same over the study period 
+
+in the control group and went up over time for the experimental group.
 
 ## Problem 3
 
@@ -317,3 +321,14 @@ ggplot(p1, aes(x = B_1hat, y = mean_est)) +
   geom_smooth(data = p2, se = FALSE, color = "red")
 ```
 
+Typically, the sample average of $\hat{\beta_1}$ across tests for which the null is rejected
+
+does not approximate the true value of $\beta_1$. However, it can approximate the true value
+
+if there are a similar number of estimates greater than and less than the true value. 
+
+The linear model function tests whether the estimated paramaters match the actual value of 
+
+the parameter given a random sample of x. So, a rejection of the null indicates that the estimated
+
+paramater does not match the true parameter.
