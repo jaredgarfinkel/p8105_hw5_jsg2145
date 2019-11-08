@@ -39,13 +39,6 @@ iris_with_missing <- iris_with_missing %>%
   janitor::clean_names()
 ```
 
-
-```{r, example}
-iris_with_missing %>% 
-  mutate(sepal_length =
-           if_else(is.na(sepal_length), round(mean(sepal_length, na.rm = TRUE), digits = 1), sepal_length))
-```
-
 ```{r, example 2}
 iris_with_missing %>% 
   mutate(sepal_length = 
@@ -58,7 +51,6 @@ iris_with_missing %>%
   mutate(species = 
            replace_na(species, "virginica"))
 ```
-
 
 ```{r}
 df <- iris_with_missing
@@ -126,7 +118,7 @@ impute_dat = function(df = iris_with_missing, x){
 }
 ```
 
-```{r, for loop over function}
+```{r, for loop over function, results = "hide"}
 output_f = vector("list", length = 5)
 
 for (i in 1:5) {
@@ -136,7 +128,7 @@ for (i in 1:5) {
 output_f
 ```
 
-```{r}
+```{r, results = "hide"}
 fix_df <- map_dfr(iris_with_missing, ~impute_dat(x = .x))
 
 fix_df
@@ -212,4 +204,116 @@ exp_tidy %>%
 ```
 
 ## Problem 3
+
+```{r}
+sim_df <- tibble(
+  n = 30,
+  x_i1 = rnorm(30),
+  B_0 = 2,
+  s2 = 50,
+  B_1 = 0
+)
+```
+
+```{r}
+sim_regression = function(B_0 = 2, B_1 = 0, s2 = 50) {
+  sim_df <- tibble(
+    x = rnorm(30, mean = 0, sd = 1),
+    y = B_0 + B_1 * x + rnorm(30, 0, s2)
+  )
+  sim_fit = lm(y ~ x, data = sim_df) %>% 
+    broom::tidy()
+
+  tibble(
+    p = pull(sim_fit, p.value)[2],
+    B_1hat = pull(sim_fit, estimate)[2]
+  )
+}
+```
+  
+```{r}
+output = vector("list", length = 100)
+
+for (i in 1:100) {
+  output[[i]] = sim_regression() %>% 
+    bind_rows()
+}
+```
+
+```{r}
+B_1list = list("B_10" = 0, 
+              "B_11" = 1, 
+              "B_12" = 2, 
+              "B_13" = 3,
+              "B_14" = 4,
+              "B_15" = 5,
+              "B_16" = 6)
+output = vector("list", length = 7)
+
+for (i in 1:7) {
+  output[[i]] = rerun(100, sim_regression(B_1 = B_1list[[i]])) %>% 
+    bind_rows()
+}
+```
+
+```{r}
+output_df = map(B_1list, ~rerun(100, sim_regression(B_1 = .x)))
+```
+
+```{r}
+output_tib = bind_rows(list(output_df)) %>% 
+  pivot_longer(cols = B_10:B_16, names_to = "B_1hat") %>% 
+  unnest() %>% 
+  rename(B_1 = B_1hat1) %>% 
+  group_by(B_1hat) %>%
+  filter(p < 0.05) %>% 
+  summarize(count = n()) %>% 
+  mutate(prop = count/100,
+         B_1hat = as.factor(B_1hat),
+         B_1hat = as.numeric(B_1hat),
+         B_1hat = B_1hat - 1)
+```
+
+```{r}
+output_tib %>% 
+  ggplot(aes(x = B_1hat, y = prop)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+output_unnest = bind_rows(list(output_df)) %>% 
+  pivot_longer(cols = B_10:B_16, names_to = "B_1hat") %>% 
+  unnest() %>% 
+  rename(B_1 = B_1hat1) %>%
+  mutate(B_1hat = as.factor(B_1hat),
+         B_1hat = as.numeric(B_1hat),
+         B_1hat = B_1hat - 1)
+```
+
+
+```{r}
+p1 <- output_unnest %>% 
+  group_by(B_1hat) %>% 
+  summarize(
+    mean_est = mean(B_1)
+  )
+```
+
+```{r}
+p2 <- output_unnest %>% 
+  filter(p < 0.05) %>% 
+  group_by(B_1hat) %>% 
+  summarize(
+    mean_est = mean(B_1)
+  )
+```
+
+```{r}
+ggplot(p1, aes(x = B_1hat, y = mean_est)) +
+  geom_point(color = "blue") +
+  geom_smooth(se = FALSE) +
+  geom_point(data = p2, color = "red") +
+  geom_smooth(data = p2, se = FALSE, color = "red")
+```
 
