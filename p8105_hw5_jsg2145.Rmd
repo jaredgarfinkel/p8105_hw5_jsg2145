@@ -192,7 +192,6 @@ exp_tidy <- exp_df %>%
 
 ```{r}
 exp_tidy %>% 
-  group_by(file_names) %>% 
   mutate(week = as_factor(week),
          week = as.numeric(week),
          labels = ifelse(str_detect(file_names, "^con"), "control", "experimental")) %>% 
@@ -252,7 +251,9 @@ B_1list = list("B_10" = 0,
               "B_14" = 4,
               "B_15" = 5,
               "B_16" = 6)
+```
 
+```{r}
 output = vector("list", length = 7)
 
 for (i in 1:7) {
@@ -324,12 +325,14 @@ ggplot(p1, aes(x = B_1hat, y = mean_est)) +
 
 Typically, the sample average of $\hat{\beta_1}$ across tests for which the null is rejected
 
-is not expected to approximate the true value of $\beta_1$. However, it can approximate the true value
+is not expected to approximate the true value of $\beta_1$. 
 
-if there are a similar number of estimates greater than and less than the true value. 
+The linear model function tests whether the estimated paramaters are zero, which would indicate no 
 
-The linear model function tests whether the estimated paramaters match the actual value of 
+predictive value of the parameter $x_{1}$. So, a rejection of the null indicates that the estimated
 
-the parameter given a random sample of x. So, a rejection of the null indicates that the estimated
+paramater is correlated with the outcome of interest.
 
-paramater does not match the true parameter.
+The larger the effect size the more we expect the null hypothesis to be rejected because the
+
+power of the test rises as the effect size rises.
